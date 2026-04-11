@@ -18,26 +18,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database and other startup tasks"""
-    try:
-        # Import here to avoid circular imports
-        from app.database import init_db
-        from app.config.settings import settings
-        
-        # Initialize database
-        init_db()
-        logger.info("Database initialized successfully")
-        
-        # Log startup info
-        logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-        logger.info(f"Allowed origins: {settings.allowed_origins}")
-        
-    except Exception as e:
-        logger.error(f"Startup failed: {e}")
-        # Continue startup even if DB fails
-
+# Add middleware BEFORE startup events
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
@@ -48,9 +29,8 @@ async def log_requests(request: Request, call_next):
     return response
 
 # Configure CORS with safe defaults
-@app.on_event("startup")
-async def configure_cors():
-    """Configure CORS after settings are loaded"""
+def configure_cors():
+    """Configure CORS with safe defaults"""
     try:
         from app.config.settings import settings
         
@@ -83,8 +63,7 @@ async def configure_cors():
         )
 
 # Include routers with error handling
-@app.on_event("startup")
-async def include_routers():
+def include_routers():
     """Include all API routers"""
     try:
         from app.routes import (
@@ -113,6 +92,30 @@ async def include_routers():
     except Exception as e:
         logger.error(f"Failed to include routers: {e}")
         # Continue with basic app even if routers fail
+
+# Configure CORS and routers immediately
+configure_cors()
+include_routers()
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database and other startup tasks"""
+    try:
+        # Import here to avoid circular imports
+        from app.database import init_db
+        from app.config.settings import settings
+        
+        # Initialize database
+        init_db()
+        logger.info("Database initialized successfully")
+        
+        # Log startup info
+        logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+        logger.info(f"Allowed origins: {settings.allowed_origins}")
+        
+    except Exception as e:
+        logger.error(f"Startup failed: {e}")
+        # Continue startup even if DB fails
 
 @app.get("/")
 async def root():
