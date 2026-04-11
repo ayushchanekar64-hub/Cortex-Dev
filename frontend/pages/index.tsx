@@ -25,7 +25,7 @@ import ProjectOutput from '../components/ProjectOutput'
 import LivePreview from '../components/LivePreview'
 import { LogEntry, GeneratedFile } from '../types'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://cortex-dev-1hgo.onrender.com'
 
 export default function Home() {
   const [prompt, setPrompt] = useState('')
@@ -308,13 +308,13 @@ export default function Home() {
               Object.entries(modifiedFiles).forEach(([path, content]) => {
                 const existingIndex = files.findIndex(f => f.path === path)
                 if (existingIndex >= 0) {
-                  files[existingIndex].content = content
+                  files[existingIndex].content = content as string
                 } else {
                   files.push({
                     id: String(fileId++),
                     name: path.split('/').pop() || path,
                     path: path,
-                    content: content,
+                    content: content as string,
                     language: path.endsWith('.css') ? 'css' : 
                               path.endsWith('.json') ? 'json' : 
                               path.endsWith('.py') ? 'python' : 'typescript',
