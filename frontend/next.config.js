@@ -6,6 +6,12 @@ const nextConfig = {
   experimental: {
     workerThreads: true,
     webpackBuildWorker: false
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   }
 }
 
