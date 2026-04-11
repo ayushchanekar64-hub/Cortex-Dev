@@ -304,17 +304,23 @@ export default function Home() {
             const modifyData = await modifyRes.json()
             if (modifyData.final_output && modifyData.final_output.generated_code) {
               // Merge modified files with template
-              const modifiedFiles = modifyData.final_output.generated_code
+              const modifiedFiles = modifyData.final_output.generated_code as Record<string, unknown>
               Object.entries(modifiedFiles).forEach(([path, content]) => {
+                const normalizedContent =
+                  typeof content === 'string'
+                    ? content
+                    : content == null
+                      ? ''
+                      : JSON.stringify(content, null, 2)
                 const existingIndex = files.findIndex(f => f.path === path)
                 if (existingIndex >= 0) {
-                  files[existingIndex].content = content as string
+                  files[existingIndex].content = normalizedContent
                 } else {
                   files.push({
                     id: String(fileId++),
                     name: path.split('/').pop() || path,
                     path: path,
-                    content: content as string,
+                    content: normalizedContent,
                     language: path.endsWith('.css') ? 'css' : 
                               path.endsWith('.json') ? 'json' : 
                               path.endsWith('.py') ? 'python' : 'typescript',
