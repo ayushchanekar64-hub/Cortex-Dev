@@ -15,7 +15,8 @@ import {
   Plus,
   FolderOpen,
   Save,
-  History
+  History,
+  Monitor
 } from 'lucide-react'
 import PromptInput from '../components/PromptInput'
 import FileExplorer from '../components/FileExplorer'
@@ -1570,42 +1571,38 @@ export default function Home() {
         {/* Workspace Center */}
         <div className="flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-[#0a0a0c] to-[#12141a]">
           
-          {/* 4. Glass Editor Tab Bar */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <div className="h-12 flex items-center bg-[#0f1115]/80 border-b border-white/5 shrink-0 px-2 space-x-1 overflow-x-auto no-scrollbar">
-              {[
-                { id: 'code', icon: Code2, label: selectedFile ? selectedFile.name : 'Console', color: 'text-indigo-400' },
-                { id: 'preview', icon: LayoutTemplate, label: 'Live Preview', color: 'text-emerald-400' }
-              ].map(tab => (
-                <motion.button 
-                  key={tab.id}
-                  whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.05)' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveEditorTab(tab.id as any)}
-                  className={`flex items-center px-6 h-9 rounded-lg space-x-3 text-[13px] font-bold transition-all outline-none whitespace-nowrap ${
-                    activeEditorTab === tab.id 
-                    ? 'bg-indigo-500/10 text-white border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.1)]' 
-                    : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <tab.icon className={`w-5 h-5 ${activeEditorTab === tab.id ? tab.color : 'text-slate-500'}`} />
-                  <span>{tab.label}</span>
-                </motion.button>
-              ))}
-            </div>
-            
-            {/* Main Stage */}
+          {/* Main Stage - Split Screen Layout */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* Main Stage - Split Screen Layout */}
             <div className="flex-1 overflow-hidden relative">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeEditorTab}
-                  initial={{ opacity: 0, scale: 0.99 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full"
-                >
-                  {activeEditorTab === 'code' ? (
-                    selectedFile ? (
+              <div className="h-full flex">
+                {/* File Explorer (Left) */}
+                {generatedFiles.length > 0 && (
+                  <div className="w-64 border-r border-white/5 bg-[#0f1115]/40 flex flex-col shrink-0">
+                    <div className="h-10 flex items-center px-4 border-b border-white/5">
+                      <Files className="w-4 h-4 text-indigo-400 mr-2" />
+                      <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Files</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+                      <FileExplorer
+                        files={generatedFiles}
+                        selectedFile={selectedFile}
+                        onSelectFile={setSelectedFile}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Code Editor (Center) */}
+                <div className="flex-1 flex flex-col min-w-0">
+                  <div className="h-10 flex items-center px-4 border-b border-white/5 bg-[#0f1115]/40">
+                    <Code2 className="w-4 h-4 text-sky-400 mr-2" />
+                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                      {selectedFile ? selectedFile.name : 'Editor'}
+                    </span>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    {selectedFile ? (
                       <CodePreview file={selectedFile} files={generatedFiles} fontSize={settings.fontSize} />
                     ) : (
                       <motion.div 
@@ -1624,22 +1621,33 @@ export default function Home() {
                         </div>
                         <p className="text-slate-500 font-bold tracking-[0.2em] uppercase text-[10px] group-hover:text-slate-300 transition-colors">Awaiting neural input. Click to start.</p>
                       </motion.div>
-                    )
-                  ) : (
-                    <LivePreview 
-                      files={generatedFiles} 
-                      onFileUpdate={(file, newContent) => {
-                        setGeneratedFiles(prev => prev.map(f => 
-                          f.path === file.path ? { ...f, content: newContent } : f
-                        ))
-                        if (selectedFile?.path === file.path) {
-                          setSelectedFile({ ...selectedFile, content: newContent })
-                        }
-                      }}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
+                    )}
+                  </div>
+                </div>
+
+                {/* Live Preview (Right) */}
+                {generatedFiles.length > 0 && (
+                  <div className="flex-1 flex flex-col min-w-0 border-l border-white/5">
+                    <div className="h-10 flex items-center px-4 border-b border-white/5 bg-[#0f1115]/40">
+                      <Monitor className="w-4 h-4 text-emerald-400 mr-2" />
+                      <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Live Preview</span>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <LivePreview 
+                        files={generatedFiles} 
+                        onFileUpdate={(file, newContent) => {
+                          setGeneratedFiles(prev => prev.map(f => 
+                            f.path === file.path ? { ...f, content: newContent } : f
+                          ))
+                          if (selectedFile?.path === file.path) {
+                            setSelectedFile({ ...selectedFile, content: newContent })
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Monitor, FileCode, Download, AlertTriangle, Save, Edit3, Eye } from 'lucide-react'
 import CodePreview from './CodePreview'
+import SandpackPreview from './SandpackPreview'
 
 interface LivePreviewProps {
   files: any[]
@@ -11,6 +12,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
   const [selectedFile, setSelectedFile] = useState<any>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [editedContent, setEditedContent] = useState('')
+  const [showSandpack, setShowSandpack] = useState(true)
 
   // Filter frontend files
   const frontendFiles = files.filter((file: any) => {
@@ -69,24 +71,52 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
     setEditedContent('')
   }
 
+  // Check if it's a React app
+  const isReactApp = frontendFiles.some((file: any) => {
+    const content = file.content || '';
+    const path = file.path || file.name || '';
+    return path.includes('App.js') || 
+           path.includes('App.jsx') ||
+           path.includes('App.tsx') ||
+           path.includes('index.js') ||
+           content.includes('react') ||
+           content.includes('React');
+  });
+
   return (
-    <div className="h-full w-full flex flex-col bg-[#1e1e1e] overflow-hidden">
-      <div className="h-10 flex items-center justify-between px-4 shrink-0 bg-[#2d2d2d] border-b border-[#2d2d2d]">
+    <div className="h-full w-full flex flex-col bg-[#0a0a0c] overflow-hidden">
+      {/* Header */}
+      <div className="h-12 flex items-center justify-between px-4 shrink-0 bg-[#0f1115]/80 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <FileCode className="w-4 h-4 text-[#4ec9b0]" />
-          <h3 className="font-semibold text-xs text-[#cccccc] uppercase tracking-wider">Generated Files</h3>
+          <Monitor className="w-4 h-4 text-emerald-400" />
+          <h3 className="font-semibold text-xs text-slate-300 uppercase tracking-wider">
+            {isReactApp ? 'Live Preview' : 'Generated Files'}
+          </h3>
         </div>
         <div className="flex items-center gap-2">
-          {selectedFile && !isEditing && onFileUpdate && (
+          {isReactApp && (
+            <button
+              onClick={() => setShowSandpack(!showSandpack)}
+              className="p-1.5 hover:bg-white/10 rounded transition-colors"
+              title={showSandpack ? 'View Code' : 'View Preview'}
+            >
+              {showSandpack ? (
+                <FileCode className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
+              ) : (
+                <Monitor className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
+              )}
+            </button>
+          )}
+          {selectedFile && !isEditing && onFileUpdate && showSandpack === false && (
             <button 
               onClick={handleEditClick}
               className="p-1.5 hover:bg-white/10 rounded transition-colors"
               title="Edit file"
             >
-              <Edit3 className="w-3.5 h-3.5 text-[#858585] hover:text-white" />
+              <Edit3 className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
             </button>
           )}
-          {isEditing && (
+          {isEditing && showSandpack === false && (
             <>
               <button 
                 onClick={handleSaveClick}
@@ -100,7 +130,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
                 className="p-1.5 hover:bg-white/10 rounded transition-colors"
                 title="Cancel"
               >
-                <Eye className="w-3.5 h-3.5 text-[#858585] hover:text-white" />
+                <Eye className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
               </button>
             </>
           )}
@@ -109,71 +139,79 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
             className="p-1.5 hover:bg-white/10 rounded transition-colors"
             title="Download all files"
           >
-            <Download className="w-3.5 h-3.5 text-[#858585] hover:text-white" />
+            <Download className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
           </button>
         </div>
       </div>
       
-      <div className="flex-1 overflow-hidden flex">
-        {/* File List */}
-        <div className="w-48 border-r border-[#2d2d2d] overflow-y-auto custom-scrollbar">
-          <div className="p-2">
-            {frontendFiles.map((file: any, index: number) => {
-              const fileName = file.name || file.path?.split('/').pop() || 'Unknown';
-              const isSelected = selectedFile?.path === file.path;
-              return (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setSelectedFile(file)
-                    setIsEditing(false)
-                    setEditedContent('')
-                  }}
-                  className={`w-full text-left px-3 py-2 text-xs rounded mb-1 transition-colors ${
-                    isSelected 
-                      ? 'bg-[#4ec9b0]/20 text-[#4ec9b0]' 
-                      : 'text-[#858585] hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  {fileName}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* File Content */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          {selectedFile ? (
-            isEditing ? (
-              <div className="h-full flex flex-col">
-                <div className="h-8 flex items-center justify-between px-4 bg-[#1a1a1a] border-b border-[#2d2d2d]">
-                  <span className="text-xs text-[#858585]">Editing: {selectedFile.path || selectedFile.name}</span>
-                </div>
-                <textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  className="flex-1 bg-[#0f1115] text-[#cccccc] p-4 font-mono text-xs resize-none focus:outline-none custom-scrollbar"
-                  spellCheck={false}
-                />
+      <div className="flex-1 overflow-hidden">
+        {isReactApp && showSandpack ? (
+          <SandpackPreview files={frontendFiles} />
+        ) : (
+          <div className="h-full flex">
+            {/* File List */}
+            <div className="w-48 border-r border-white/5 overflow-y-auto custom-scrollbar bg-black/20">
+              <div className="p-2">
+                {frontendFiles.map((file: any, index: number) => {
+                  const fileName = file.name || file.path?.split('/').pop() || 'Unknown';
+                  const isSelected = selectedFile?.path === file.path;
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedFile(file)
+                        setIsEditing(false)
+                        setEditedContent('')
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs rounded mb-1 transition-colors ${
+                        isSelected 
+                          ? 'bg-indigo-500/20 text-indigo-400' 
+                          : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
+                      }`}
+                    >
+                      {fileName}
+                    </button>
+                  )
+                })}
               </div>
-            ) : (
-              <CodePreview file={selectedFile} files={frontendFiles} fontSize="12px" />
-            )
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <p className="text-xs text-[#858585]">Select a file to view</p>
             </div>
-          )}
-          
-          {/* Info message */}
-          <div className="px-4 py-2 bg-[#1a1a1a] border-t border-[#2d2d2d]">
-            <div className="flex items-center gap-2 text-[10px] text-[#858585]">
-              <AlertTriangle className="w-3 h-3 text-yellow-500" />
-              <span>Browser-based rendering not available. Download files and run locally with npm install && npm start</span>
+
+            {/* File Content */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+              {selectedFile ? (
+                isEditing ? (
+                  <div className="h-full flex flex-col">
+                    <div className="h-8 flex items-center justify-between px-4 bg-[#0f1115] border-b border-white/5">
+                      <span className="text-xs text-slate-500">Editing: {selectedFile.path || selectedFile.name}</span>
+                    </div>
+                    <textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      className="flex-1 bg-[#0a0a0c] text-slate-300 p-4 font-mono text-xs resize-none focus:outline-none custom-scrollbar"
+                      spellCheck={false}
+                    />
+                  </div>
+                ) : (
+                  <CodePreview file={selectedFile} files={frontendFiles} fontSize="12px" />
+                )
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-xs text-slate-500">Select a file to view</p>
+                </div>
+              )}
+              
+              {/* Info message */}
+              {isReactApp && (
+                <div className="px-4 py-2 bg-[#0f1115] border-t border-white/5">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                    <AlertTriangle className="w-3 h-3 text-indigo-400" />
+                    <span>React app detected. Toggle preview button to see live rendering.</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
