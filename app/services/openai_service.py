@@ -1,9 +1,15 @@
 from typing import Dict, Any, Optional
 import logging
-import google.generativeai as genai
 from app.config.settings import settings
 
 logger = logging.getLogger(__name__)
+
+try:
+    import google.generativeai as genai
+    GEMINI_IMPORT_ERROR = None
+except Exception as exc:
+    genai = None
+    GEMINI_IMPORT_ERROR = exc
 
 
 class OpenAIService:
@@ -12,6 +18,9 @@ class OpenAIService:
         self.use_gemini = False
         
         if self.api_key and (self.api_key.startswith("AIza") or "GEMINI" in settings.gemini_api_key):
+            if genai is None:
+                logger.error(f"google.generativeai import failed: {GEMINI_IMPORT_ERROR}")
+                return
             try:
                 genai.configure(api_key=self.api_key)
                 self.model = genai.GenerativeModel('gemini-1.5-flash')

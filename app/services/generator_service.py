@@ -1,17 +1,6 @@
 from typing import Dict, Any, List, Optional
 import logging
 import json
-import os
-from datetime import datetime
-import google.generativeai as genai
-from app.config.settings import settings
-
-logger = logging.getLogger(__name__)
-
-
-from typing import Dict, Any, List, Optional
-import logging
-import json
 from datetime import datetime
 from app.services.ai_service import ai_service
 from app.services.prompts import WEB_DEV_GENERATOR_PROMPT, get_frontend_prompt, get_backend_prompt
@@ -88,4 +77,3 @@ class GeneratorService:
     def get_supported_components(self) -> List[str]:
         """Get list of supported components for generation."""
         return ['frontend', 'backend']
-

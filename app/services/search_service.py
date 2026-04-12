@@ -1,6 +1,5 @@
 import logging
 from typing import List, Dict, Any
-from google.generativeai import genai
 import os
 from app.config.settings import settings
 
