@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import time
 import logging
 import os
+from importlib import import_module
 
 # Configure logging
 logging.basicConfig(
@@ -65,33 +66,36 @@ def configure_cors():
 # Include routers with error handling
 def include_routers():
     """Include all API routers"""
-    try:
-        from app.routes import (
-            generate, planner, generator, debug, tester, 
-            pipeline, auth, projects, github, templates
-        )
-        
-        routers = [
-            generate.router,
-            planner.router,
-            generator.router,
-            debug.router,
-            tester.router,
-            pipeline.router,
-            auth.router,
-            projects.router,
-            github.router,
-            templates.router
-        ]
-        
-        for router in routers:
+    route_modules = [
+        "generate",
+        "planner",
+        "generator",
+        "debug",
+        "tester",
+        "pipeline",
+        "auth",
+        "projects",
+        "github",
+        "templates",
+    ]
+
+    included = 0
+    failed = []
+
+    for module_name in route_modules:
+        try:
+            module = import_module(f"app.routes.{module_name}")
+            router = getattr(module, "router", None)
+            if router is None:
+                raise AttributeError("router attribute not found")
             app.include_router(router, prefix="/api")
-        
-        logger.info("All routers included successfully")
-        
-    except Exception as e:
-        logger.error(f"Failed to include routers: {e}")
-        # Continue with basic app even if routers fail
+            included += 1
+            logger.info(f"Included router: app.routes.{module_name}")
+        except Exception as e:
+            failed.append(module_name)
+            logger.error(f"Failed to include router app.routes.{module_name}: {e}")
+
+    logger.info(f"Router include summary: included={included}, failed={len(failed)}")
 
 # Configure CORS and routers immediately
 configure_cors()
