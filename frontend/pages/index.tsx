@@ -288,7 +288,7 @@ export default function Home() {
           // Now ask AI to modify the template based on prompt
           addLog('Neural adaptation in progress...', 'info')
           
-          const modifyRes = await fetch('${API_URL}/api/pipeline/modify', {
+          const modifyRes = await fetch(`${API_URL}/api/pipeline/modify`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ export default function Home() {
         }
       } else {
         // Generate from scratch
-        const response = await fetch('${API_URL}/api/pipeline/generate', {
+        const response = await fetch(`${API_URL}/api/pipeline/generate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -420,7 +420,7 @@ export default function Home() {
           if (user) {
             try {
               addLog('Syncing project to neural cloud...', 'info')
-              await fetch('${API_URL}/api/projects/save', {
+              await fetch(`${API_URL}/api/projects/save`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -470,7 +470,7 @@ export default function Home() {
     addLog('Processing modification request...', 'info')
 
     try {
-      const response = await fetch('${API_URL}/api/pipeline/modify', {
+      const response = await fetch(`${API_URL}/api/pipeline/modify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -614,7 +614,7 @@ export default function Home() {
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
-        const res = await fetch('${API_URL}/api/templates/')
+        const res = await fetch(`${API_URL}/api/templates/`)
         const data = await res.json()
         if (res.ok) {
           setTemplates(data.templates || [])
@@ -755,7 +755,7 @@ export default function Home() {
       addLog('Connecting to GitHub...', 'info')
       
       // Get user info
-      const userRes = await fetch('${API_URL}/api/github/user', {
+      const userRes = await fetch(`${API_URL}/api/github/user`, {
         headers: { 'Authorization': `token ${githubToken}` }
       })
       
@@ -770,7 +770,7 @@ export default function Home() {
       addLog(`Creating repository ${repoName}...`, 'info')
       
       // Create repository
-      const createRes = await fetch('${API_URL}/api/github/create-repo', {
+      const createRes = await fetch(`${API_URL}/api/github/create-repo`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -799,7 +799,7 @@ export default function Home() {
         content: f.content
       }))
       
-      const pushRes = await fetch('${API_URL}/api/github/push-files', {
+      const pushRes = await fetch(`${API_URL}/api/github/push-files`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -1906,7 +1906,7 @@ function AuthForm({ onSuccess, onClose }: { onSuccess: (user: any) => void, onCl
                 setLoading(true)
                 setError('')
                 try {
-                  const res = await fetch('${API_URL}/api/auth/forgot-password', {
+                  const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: formData.email })
