@@ -3,8 +3,14 @@ import json
 import os
 import asyncio
 from typing import Dict, Any, List, Optional
-from google import genai
 from app.config.settings import settings
+
+try:
+    from google import genai
+    GENAI_IMPORT_ERROR = None
+except Exception as exc:
+    genai = None
+    GENAI_IMPORT_ERROR = exc
 
 logger = logging.getLogger(__name__)
 
@@ -13,9 +19,16 @@ class AIService:
         self.gemini_key = settings.gemini_api_key or os.getenv("GEMINI_API_KEY")
         
         self.gemini_configured = False
+        self.gemini_client = None
         
         # Configure Gemini
         if self.gemini_key:
+            if genai is None:
+                logger.error(
+                    f"AIService: google-genai import failed: {GENAI_IMPORT_ERROR}. "
+                    "Install dependency: google-genai"
+                )
+                return
             try:
                 self.gemini_client = genai.Client(api_key=self.gemini_key)
                 self.gemini_configured = True
@@ -38,6 +51,10 @@ class AIService:
                 # For other errors, re-raise
                 raise
         else:
+            if genai is None:
+                raise ValueError(
+                    "Gemini SDK not installed. Install 'google-genai' and redeploy backend."
+                )
             raise ValueError("Gemini not configured. Please check your API key.")
 
     async def _generate_gemini_json(self, prompt: str, system_instruction: str = None) -> Dict[str, Any]:
