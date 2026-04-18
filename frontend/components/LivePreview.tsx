@@ -189,7 +189,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
               <div className="px-4 py-2 bg-[#0f1115] border-t border-white/5">
                 <div className="flex items-center gap-2 text-[10px] text-slate-500">
                   <AlertTriangle className="w-3 h-3 text-indigo-400" />
-                  <span>Live preview disabled (Sandpack removed). Showing code only.</span>
+                  <span>React app detected. Code view enabled.</span>
                 </div>
               </div>
             )}
