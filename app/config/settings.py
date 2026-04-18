@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import List, Optional
 import os
 import logging
@@ -16,6 +17,33 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
     gemini_api_key: str = ""
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def _coerce_debug(cls, value):
+        if isinstance(value, bool) or value is None:
+            return bool(value)
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"1", "true", "yes", "y", "on", "debug"}:
+                return True
+            if normalized in {"0", "false", "no", "n", "off", "release", "prod", "production"}:
+                return False
+        return False
+
+    @field_validator("port", mode="before")
+    @classmethod
+    def _coerce_port(cls, value):
+        if value is None:
+            return 8000
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value.strip())
+            except ValueError:
+                return 8000
+        return 8000
 
     @property
     def allowed_origins(self) -> List[str]:
@@ -51,7 +79,7 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Override port from environment if available
+        # Override port from environment if available (Render sets PORT)
         env_port = os.getenv("PORT")
         if env_port:
             try:
@@ -66,7 +94,5 @@ try:
     logger.info(f"Settings loaded: {settings.app_name} v{settings.app_version}")
 except Exception as e:
     logger.error(f"Failed to load settings: {e}")
-    # Create minimal fallback settings
-    settings = Settings()
-    settings.port = 8000
-    settings.debug = False
+    # Minimal fallback (avoid crashing on import)
+    settings = Settings.model_construct(app_name="Cortex-Dev", app_version="1.0.0", debug=False, host="0.0.0.0", port=8000)

@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "next-build",
   "framework": "nextjs",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://cortex-dev-1hgo.onrender.com"

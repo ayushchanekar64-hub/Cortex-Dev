@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Sandpack, 
-  SandpackLayout, 
-  SandpackCodeEditor, 
-  SandpackPreview,
+import {
+  Sandpack,
+  SandpackLayout,
+  SandpackCodeEditor,
+  SandpackPreview as SandpackPreviewComponent,
   SandpackFileExplorer,
-  useSandpack
+  useSandpack,
 } from '@codesandbox/sandpack-react'
-import { 
-  Loader2, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle,
   RefreshCw,
   Monitor,
-  XCircle
+  XCircle,
 } from 'lucide-react'
 import { GeneratedFile } from '../types'
 
@@ -35,7 +35,7 @@ function ErrorOverlay() {
         setError(message.data?.message || 'An error occurred')
       }
     }
-    
+
     // This is a simplified error handling - in production you'd want more robust error tracking
     return () => {}
   }, [sandpack])
@@ -49,7 +49,7 @@ function LoadingOverlay() {
     <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0c]/90 backdrop-blur-sm z-10">
       <motion.div
         animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         className="flex flex-col items-center"
       >
         <Loader2 className="w-12 h-12 text-indigo-500 mb-4" />
@@ -61,7 +61,10 @@ function LoadingOverlay() {
   )
 }
 
-export default function SandpackPreview({ files, customSetup }: SandpackPreviewProps) {
+export default function SandpackPreview({
+  files,
+  customSetup,
+}: SandpackPreviewProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -69,14 +72,15 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
 
   // Check if the generated files contain a React app
   useEffect(() => {
-    const hasReactFiles = files.some(file => 
-      file.path.includes('App.js') || 
-      file.path.includes('App.jsx') ||
-      file.path.includes('App.tsx') ||
-      file.path.includes('index.js') ||
-      file.path.includes('main.jsx') ||
-      file.content.includes('react') ||
-      file.content.includes('React')
+    const hasReactFiles = files.some(
+      (file) =>
+        file.path.includes('App.js') ||
+        file.path.includes('App.jsx') ||
+        file.path.includes('App.tsx') ||
+        file.path.includes('index.js') ||
+        file.path.includes('main.jsx') ||
+        file.content.includes('react') ||
+        file.content.includes('React')
     )
     setIsReactApp(hasReactFiles)
   }, [files])
@@ -84,8 +88,8 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
   // Convert GeneratedFile[] to Sandpack files format
   const convertToSandpackFiles = () => {
     const sandpackFiles: Record<string, string> = {}
-    
-    files.forEach(file => {
+
+    files.forEach((file) => {
       // Normalize the path for Sandpack
       let normalizedPath = file.path
       // Remove any prefix directories
@@ -95,17 +99,20 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
       if (normalizedPath.includes('src/')) {
         normalizedPath = normalizedPath.replace('src/', '')
       }
-      
+
       sandpackFiles[normalizedPath] = file.content
     })
 
     // Ensure we have at least an App.js file for Sandpack
-    if (!sandpackFiles['App.js'] && !sandpackFiles['App.jsx'] && !sandpackFiles['App.tsx']) {
+    if (
+      !sandpackFiles['App.js'] &&
+      !sandpackFiles['App.jsx'] &&
+      !sandpackFiles['App.tsx']
+    ) {
       // Try to find the main component file
-      const mainComponent = files.find(f => 
-        f.name.includes('App') || 
-        f.name.includes('main') ||
-        f.name.includes('index')
+      const mainComponent = files.find(
+        (f) =>
+          f.name.includes('App') || f.name.includes('main') || f.name.includes('index')
       )
       if (mainComponent) {
         sandpackFiles['App.js'] = mainComponent.content
@@ -120,10 +127,10 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
   // Default setup for React apps
   const defaultSetup = {
     dependencies: {
-      'react': '18.2.0',
+      react: '18.2.0',
       'react-dom': '18.2.0',
-      'react-scripts': '5.0.1'
-    }
+      'react-scripts': '5.0.1',
+    },
   }
 
   const handleLoadStart = () => {
@@ -149,7 +156,9 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
         <div className="h-12 flex items-center justify-between px-4 shrink-0 bg-[#0f1115]/80 border-b border-white/5">
           <div className="flex items-center gap-2">
             <Monitor className="w-4 h-4 text-indigo-400" />
-            <h3 className="font-semibold text-xs text-slate-300 uppercase tracking-wider">Live Preview</h3>
+            <h3 className="font-semibold text-xs text-slate-300 uppercase tracking-wider">
+              Live Preview
+            </h3>
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
@@ -159,8 +168,8 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
             </div>
             <h3 className="text-lg font-bold text-white mb-2">React App Required</h3>
             <p className="text-sm text-slate-500 leading-relaxed">
-              Live preview is only available for React applications. 
-              Please generate a React-based project to see the live preview.
+              Live preview is only available for React applications. Please generate a React-based
+              project to see the live preview.
             </p>
           </div>
         </div>
@@ -174,7 +183,9 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
       <div className="h-12 flex items-center justify-between px-4 shrink-0 bg-[#0f1115]/80 border-b border-white/5">
         <div className="flex items-center gap-2">
           <Monitor className="w-4 h-4 text-emerald-400" />
-          <h3 className="font-semibold text-xs text-slate-300 uppercase tracking-wider">Live Preview</h3>
+          <h3 className="font-semibold text-xs text-slate-300 uppercase tracking-wider">
+            Live Preview
+          </h3>
           {isLoading && (
             <div className="flex items-center gap-2 ml-4">
               <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" />
@@ -257,12 +268,12 @@ export default function SandpackPreview({ files, customSetup }: SandpackPreviewP
                   <div className="h-full w-full flex flex-col">
                     <div className="flex-1 relative">
                       {isLoading && <LoadingOverlay />}
-                      <SandpackPreview 
-                        style={{ 
+                      <SandpackPreviewComponent
+                        style={{
                           height: '100%',
                           width: '100%',
                           border: 'none',
-                          background: '#0a0a0c'
+                          background: '#0a0a0c',
                         }}
                         onLoadStart={handleLoadStart}
                         onLoad={handleLoad}

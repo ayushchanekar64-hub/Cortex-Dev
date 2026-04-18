@@ -6,11 +6,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def _default_sqlite_url() -> str:
+    """
+    Render (and some other PaaS) deploys often have a read-only app dir.
+    When DATABASE_URL isn't provided, default to a writable location.
+    """
+    is_render = bool(
+        os.getenv("RENDER")
+        or os.getenv("RENDER_SERVICE_ID")
+        or os.getenv("RENDER_EXTERNAL_URL")
+    )
+    if is_render:
+        return "sqlite:////tmp/auto_dev.db"
+    return "sqlite:///./auto_dev.db"
+
+
 # Use environment variable for database URL or fallback to SQLite
-SQLALCHEMY_DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "sqlite:///./auto_dev.db"
-)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL") or _default_sqlite_url()
 
 # Configure engine based on database type
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):

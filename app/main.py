@@ -124,3 +124,8 @@ async def startup_event():
 @app.get("/")
 async def root():
     return {"status": "active"}
+
+
+@app.get("/healthz")
+async def healthz():
+    return {"status": "ok"}

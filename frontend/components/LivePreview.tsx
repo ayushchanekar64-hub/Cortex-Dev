@@ -16,11 +16,9 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
 
   // Filter frontend files
   const frontendFiles = files.filter((file: any) => {
-    const path = file.path || file.name;
-    return !path.includes('-backend/') && 
-           !path.startsWith('backend/') && 
-           !path.endsWith('.py');
-  });
+    const path = file.path || file.name
+    return !path.includes('-backend/') && !path.startsWith('backend/') && !path.endsWith('.py')
+  })
 
   if (!files || files.length === 0) {
     return (
@@ -73,15 +71,17 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
 
   // Check if it's a React app
   const isReactApp = frontendFiles.some((file: any) => {
-    const content = file.content || '';
-    const path = file.path || file.name || '';
-    return path.includes('App.js') || 
-           path.includes('App.jsx') ||
-           path.includes('App.tsx') ||
-           path.includes('index.js') ||
-           content.includes('react') ||
-           content.includes('React');
-  });
+    const content = file.content || ''
+    const path = file.path || file.name || ''
+    return (
+      path.includes('App.js') ||
+      path.includes('App.jsx') ||
+      path.includes('App.tsx') ||
+      path.includes('index.js') ||
+      content.includes('react') ||
+      content.includes('React')
+    )
+  })
 
   return (
     <div className="h-full w-full flex flex-col bg-[#0a0a0c] overflow-hidden">
@@ -108,7 +108,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
             </button>
           )}
           {selectedFile && !isEditing && onFileUpdate && showSandpack === false && (
-            <button 
+            <button
               onClick={handleEditClick}
               className="p-1.5 hover:bg-white/10 rounded transition-colors"
               title="Edit file"
@@ -118,14 +118,14 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
           )}
           {isEditing && showSandpack === false && (
             <>
-              <button 
+              <button
                 onClick={handleSaveClick}
                 className="p-1.5 hover:bg-white/10 rounded transition-colors"
                 title="Save changes"
               >
                 <Save className="w-3.5 h-3.5 text-green-500 hover:text-green-400" />
               </button>
-              <button 
+              <button
                 onClick={handleCancelClick}
                 className="p-1.5 hover:bg-white/10 rounded transition-colors"
                 title="Cancel"
@@ -134,7 +134,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
               </button>
             </>
           )}
-          <button 
+          <button
             onClick={handleDownloadAll}
             className="p-1.5 hover:bg-white/10 rounded transition-colors"
             title="Download all files"
@@ -143,7 +143,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
           </button>
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-hidden">
         {isReactApp && showSandpack ? (
           <SandpackPreview files={frontendFiles} />
@@ -153,8 +153,8 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
             <div className="w-48 border-r border-white/5 overflow-y-auto custom-scrollbar bg-black/20">
               <div className="p-2">
                 {frontendFiles.map((file: any, index: number) => {
-                  const fileName = file.name || file.path?.split('/').pop() || 'Unknown';
-                  const isSelected = selectedFile?.path === file.path;
+                  const fileName = file.name || file.path?.split('/').pop() || 'Unknown'
+                  const isSelected = selectedFile?.path === file.path
                   return (
                     <button
                       key={index}
@@ -164,8 +164,8 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
                         setEditedContent('')
                       }}
                       className={`w-full text-left px-3 py-2 text-xs rounded mb-1 transition-colors ${
-                        isSelected 
-                          ? 'bg-indigo-500/20 text-indigo-400' 
+                        isSelected
+                          ? 'bg-indigo-500/20 text-indigo-400'
                           : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
                       }`}
                     >
@@ -182,7 +182,9 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
                 isEditing ? (
                   <div className="h-full flex flex-col">
                     <div className="h-8 flex items-center justify-between px-4 bg-[#0f1115] border-b border-white/5">
-                      <span className="text-xs text-slate-500">Editing: {selectedFile.path || selectedFile.name}</span>
+                      <span className="text-xs text-slate-500">
+                        Editing: {selectedFile.path || selectedFile.name}
+                      </span>
                     </div>
                     <textarea
                       value={editedContent}
@@ -199,7 +201,7 @@ export default function LivePreview({ files, onFileUpdate }: LivePreviewProps) {
                   <p className="text-xs text-slate-500">Select a file to view</p>
                 </div>
               )}
-              
+
               {/* Info message */}
               {isReactApp && (
                 <div className="px-4 py-2 bg-[#0f1115] border-t border-white/5">
